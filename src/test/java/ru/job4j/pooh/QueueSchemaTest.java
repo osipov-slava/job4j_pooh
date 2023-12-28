@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Timeout;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class QueueSchemaTest {
 
@@ -24,7 +24,6 @@ class QueueSchemaTest {
         thread.interrupt();
         assertThat(result).contains("18");
     }
-
 
     @Test
     public void whenSingleReceiver() throws InterruptedException {

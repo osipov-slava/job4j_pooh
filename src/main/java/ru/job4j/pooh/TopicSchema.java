@@ -12,37 +12,37 @@ public class TopicSchema implements Schema {
 
     @Override
     public void addReceiver(Receiver receiver) {
-        receivers.putIfAbsent(receiver.name(), new CopyOnWriteArrayList<>());//добавить новою ПОДПИСКУ
-        receivers.get(receiver.name()).add(receiver);//Подписать на подписку получателя
+        receivers.putIfAbsent(receiver.name(), new CopyOnWriteArrayList<>());
+        receivers.get(receiver.name()).add(receiver);
         condition.on();
     }
 
     @Override
     public void publish(Message message) {
-        data.putIfAbsent(message.name(), new LinkedBlockingQueue<>()); //добавить ПОДПИСКУ
-        data.get(message.name()).add(message.text()); //добавить текст сообщения в очередь ПОДПИСКИ
+        data.putIfAbsent(message.name(), new LinkedBlockingQueue<>());
+        data.get(message.name()).add(message.text());
         condition.on();
     }
 
     @Override
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
-            for (var queueKey : receivers.keySet()) {//сет ключей/имен ПОДПИСОК
-                var queue = data.getOrDefault(queueKey, new LinkedBlockingQueue<>());//очередь сообщений по ПОДПИСКЕ
-                var receiversByQueue = receivers.get(queueKey); //текущий список получателей на ПОДПИСКУ
+            for (var queueKey : receivers.keySet()) {
+                var queue = data.getOrDefault(queueKey, new LinkedBlockingQueue<>());
+                var receiversByQueue = receivers.get(queueKey);
                 while (true) {
-                    var data = queue.poll(); //взять и удалить сообщение из очереди
+                    var data = queue.poll();
                     if (data != null) {
                         for (Receiver receiver : receiversByQueue) {
-                            receiver.receive(data);//отправить сообщение ВСЕМ подписчикам
+                            receiver.receive(data);
                         }
                     }
-                    if (data == null) { //если сообщений нет или больше нет, то работаем со след ПОДПИСКОЙ
+                    if (data == null) {
                         break;
                     }
                 }
             }
-            condition.off();//все очереди сообщений отработаны
+            condition.off();
             try {
                 condition.await();
             } catch (InterruptedException e) {
